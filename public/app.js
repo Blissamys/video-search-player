@@ -316,7 +316,7 @@
       return (
         '<article class="card" data-idx="' + i + '" tabindex="0" role="button">' +
           '<div class="thumb">' +
-            '<img loading="lazy" src="' + escapeHTML(item.cover || '') + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
+            '<img loading="lazy" src="' + escapeHTML(item.cover || '') + '" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility=\'hidden\'">' +
             (item.duration ? '<span class="dur">' + escapeHTML(item.duration) + '</span>' : '') +
             '<span class="src-badge ' + badge + '">' + badgeText + '</span>' +
           '</div>' +
