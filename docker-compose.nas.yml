@@ -1,0 +1,15 @@
+services:
+  video-search-api:
+    image: node:22-alpine
+    container_name: video-search-api
+    ports:
+      - "3000:3000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+    working_dir: /app
+    restart: unless-stopped
+    command: >
+      sh -c "wget -qO- https://github.com/fr47cwp6kj-dotcom/video-search-player/archive/refs/heads/master.tar.gz |
+      tar -xz -C /app --strip-components=1 &&
+      node server.js"
