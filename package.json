@@ -1,0 +1,13 @@
+{
+  "name": "video-search-player",
+  "version": "1.0.0",
+  "private": true,
+  "description": "多来源视频搜索与网页播放器（B站 / 样片库）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

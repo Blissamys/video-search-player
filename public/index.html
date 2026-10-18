@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>聚合视频搜索播放器</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark"><i data-lucide="play"></i></span>
+        <div class="brand-text">
+          <h1>聚合视频搜索</h1>
+          <p>多源检索 · 网页播放</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="searchbar-wrap">
+    <form id="searchForm" class="searchbar" autocomplete="off">
+      <i data-lucide="search"></i>
+      <input id="searchInput" type="text" placeholder="输入关键词，搜索视频…" maxlength="100">
+      <button type="submit" class="primary-btn">搜索</button>
+    </form>
+    <div class="history-bar" id="historyBar"></div>
+  </section>
+
+  <main class="main">
+    <section id="theater" class="theater hidden" aria-label="播放器">
+      <div class="stage" id="stage">
+        <div class="stage-empty" id="stageEmpty">
+          <i data-lucide="clapperboard"></i>
+          <span>从下方结果中选择视频开始播放</span>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="side-head">
+          <h2 id="activeTitle">未选择视频</h2>
+          <button class="icon-btn" id="closeTheater" aria-label="关闭播放器"><i data-lucide="x"></i></button>
+        </div>
+        <p class="side-meta" id="activeMeta">支持 B 站嵌入播放与本地网页播放器</p>
+
+        <div id="embedHint" class="hint hidden">
+          B 站视频由官方嵌入播放器提供，倍速与画质可在其播放器内调节。
+        </div>
+
+        <div id="videoControls" class="controls hidden">
+          <div class="progress-row">
+            <span id="currentTime">0:00</span>
+            <input type="range" id="progress" min="0" max="1000" value="0" step="1" aria-label="进度">
+            <span id="totalTime">0:00</span>
+          </div>
+
+          <div class="transport-row">
+            <button class="icon-btn" id="back5" aria-label="后退5秒"><i data-lucide="rotate-ccw"></i></button>
+            <button class="icon-btn big" id="playBtn" aria-label="播放或暂停"><i data-lucide="play"></i></button>
+            <button class="icon-btn" id="fwd5" aria-label="前进5秒"><i data-lucide="rotate-cw"></i></button>
+            <span class="divider"></span>
+            <button class="icon-btn" id="prevFrame" aria-label="上一帧"><i data-lucide="chevron-first"></i></button>
+            <span class="frame-label">帧</span>
+            <button class="icon-btn" id="nextFrame" aria-label="下一帧"><i data-lucide="chevron-last"></i></button>
+            <select id="fpsSelect" aria-label="帧率">
+              <option value="auto">自动</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+              <option value="60">60</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <label class="setting-label" for="rate">倍速 <output id="rateVal">1.00x</output></label>
+            <input type="range" id="rate" min="0.25" max="4" step="0.05" value="1" aria-label="播放倍速">
+          </div>
+
+          <div class="toggle-row">
+            <button class="toggle" id="loopBtn" aria-pressed="false"><i data-lucide="repeat"></i>循环</button>
+            <button class="toggle" id="muteBtn" aria-pressed="false"><i data-lucide="volume-2"></i>静音</button>
+            <input type="range" id="volume" min="0" max="1" step="0.01" value="1" aria-label="音量">
+            <button class="icon-btn" id="fullBtn" aria-label="全屏"><i data-lucide="maximize"></i></button>
+          </div>
+
+          <dl class="stats">
+            <div><dt>实测帧率</dt><dd id="statFps">--</dd></div>
+            <div><dt>分辨率</dt><dd id="statRes">--</dd></div>
+            <div><dt>当前倍速</dt><dd id="statRate">1.00x</dd></div>
+          </dl>
+        </div>
+
+        <div class="direct-link">
+          <label for="directUrl"><i data-lucide="link"></i>直链播放</label>
+          <div class="direct-row">
+            <input id="directUrl" type="url" placeholder="粘贴 mp4 / webm 视频直链…" spellcheck="false">
+            <button class="primary-btn" id="playDirect"><i data-lucide="play"></i>播放</button>
+          </div>
+        </div>
+
+        <a id="openOrigin" class="ghost-btn hidden" target="_blank" rel="noopener">
+          <i data-lucide="external-link"></i>在源站打开
+        </a>
+      </aside>
+    </section>
+
+    <section id="feedback" class="feedback" aria-live="polite"></section>
+    <div class="results-head">
+      <h2 id="resultsTitle">全部视频</h2>
+      <span id="resultsCount" class="results-count"></span>
+    </div>
+    <section class="results" id="results" aria-label="搜索结果"></section>
+    <div class="load-more-wrap">
+      <button id="loadMore" class="ghost-btn hidden"><i data-lucide="chevrons-down"></i>加载更多</button>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>B 站搜索经本地服务代理 · 本地样片支持倍速与逐帧控制</p>
+  </footer>
+
+  <script src="hot-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
