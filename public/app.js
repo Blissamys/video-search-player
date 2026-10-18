@@ -53,6 +53,8 @@
   const playDirect = $('playDirect');
 
   const SOURCE_NAMES = { bilibili: 'B站', sample: '样片' };
+  const API_BASE = String(window.VIDEO_API_BASE || '').replace(/\/$/, '');
+  let apiBase = API_BASE;
 
   let videoEl = null;
   let frameCallbackId = null;
@@ -152,7 +154,7 @@
     if (backendChecked) return;
     backendChecked = true;
     try {
-      const res = await fetch('/api/health', { cache: 'no-store' });
+      const res = await fetch(apiBase + '/api/health', { cache: 'no-store' });
       const data = await res.json();
       offlineMode = data.ok !== true;
     } catch (_) {
@@ -204,7 +206,7 @@
         source: 'all',
         page: String(state.page),
       });
-      const res = await fetch('/api/search?' + params.toString());
+      const res = await fetch(apiBase + '/api/search?' + params.toString());
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || '搜索失败，请稍后重试');
       state.results = append ? state.results.concat(data.results) : data.results;

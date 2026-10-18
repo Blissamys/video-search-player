@@ -1,0 +1,7 @@
+.git
+.github
+node_modules
+npm-debug.log
+api
+scripts
+README.md

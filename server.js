@@ -4,6 +4,8 @@ const path = require('path');
 const { handleSearch } = require('./lib/search-core');
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
+const HOST = process.env.HOST || '0.0.0.0';
+const ALLOW_ORIGIN = process.env.ALLOW_ORIGIN || '*';
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 const MIME = {
@@ -22,6 +24,8 @@ function sendJSON(res, status, data) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
+    'Access-Control-Allow-Origin': ALLOW_ORIGIN,
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
   });
   res.end(body);
 }
@@ -53,6 +57,15 @@ function serveStatic(res, pathname) {
 
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': ALLOW_ORIGIN,
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    });
+    res.end();
+    return;
+  }
   if (url.pathname === '/api/health') {
     sendJSON(res, 200, { ok: true, mode: 'node' });
     return;
@@ -76,8 +89,10 @@ function listen(port, attemptsLeft) {
       process.exit(1);
     }
   });
-  server.listen(port, '127.0.0.1', () => {
-    console.log('聚合视频搜索服务已启动: http://localhost:' + port);
+  server.listen(port, HOST, () => {
+    console.log('聚合视频搜索服务已启动:');
+    console.log('  本机访问: http://localhost:' + port);
+    console.log('  局域网/反向代理访问: http://' + HOST + ':' + port);
   });
 }
 

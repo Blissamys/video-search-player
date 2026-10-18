@@ -51,7 +51,7 @@ node scripts/update-hot.mjs
 项目已内置 GitHub Pages 工作流，推送到 GitHub `master` 分支后会自动发布 `public/` 目录。
 
 1. **GitHub Pages 静态公网**：访问 `https://shaochenyue.asia`。热门快照、样片播放、直链播放、搜索记录推荐可用；B 站实时搜索/热门需要 Node 后端。
-2. **Node 托管（Render / Railway / Fly / 自建 VPS）**：运行 `node server.js`，功能完整。B 站接口偶发风控时会自动回退本地样片并给出提示。
+2. **NAS / Windows / VPS 后端**：运行 `node server.js`，功能完整。B 站接口偶发风控时会自动回退本地样片并给出提示。
 
 `shaochenyue.asia` 的 DNS 需要指向 GitHub Pages：
 
@@ -68,6 +68,49 @@ CNAME www   <GitHub用户名>.github.io
 ```bash
 PORT=8080 node server.js
 ```
+
+## 用 NAS 运行实时搜索 API
+
+NAS 需要支持 Docker。在项目根目录执行：
+
+```bash
+docker compose up -d --build
+```
+
+然后在 NAS 浏览器访问 `http://NAS的IP:3000/api/health`，看到：
+
+```json
+{"ok":true,"mode":"node"}
+```
+
+就说明实时 B 站搜索 API 已经可用。
+
+推荐部署方式：
+
+1. 主网页继续由 GitHub Pages 托管。
+2. NAS 的反向代理把 `api.shaochenyue.asia` 转发到容器的 `3000` 端口，并配置 HTTPS 证书。
+3. 阿里云 DNS 添加 `api A 记录`，指向你家宽带公网 IP。
+4. 路由器把 80/443 端口转发到 NAS 反向代理。
+5. 把 `public/api-config.js` 中的地址改为：
+
+```js
+window.VIDEO_API_BASE = 'https://api.shaochenyue.asia';
+```
+
+6. 提交并推送代码，GitHub Pages 会自动更新前端。
+
+如果暂时不做 HTTPS，也可以在路由器转发 `3000` 端口，并使用 `http://api.shaochenyue.asia:3000`；但主页面使用 HTTPS 时，浏览器可能阻止这种 HTTP API 请求。
+
+## 用 Windows 主机运行实时搜索 API
+
+1. 安装 [Node.js LTS](https://nodejs.org/)。
+2. 把项目文件夹复制到 Windows 主机。
+3. 双击 `start-windows.bat`。
+4. 看到 `http://localhost:3000` 启动信息后，在另一台设备访问 `http://Windows主机IP:3000/api/health` 测试。
+5. Windows 防火墙需要允许 Node.js 的 3000 端口入站。
+6. 如需公网访问，在路由器把外部端口转发到这台 Windows 主机的 `3000` 端口。
+
+如果宽带没有公网 IP，或者运营商封了 80/443 端口，需要使用 NAS/路由器自带的内网穿透，或改用 VPS/云主机。
 
 ## 关于视频来源的说明
 
