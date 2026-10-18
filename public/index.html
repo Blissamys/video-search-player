@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>聚合视频搜索播放器</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="api-config.js?v=nas-api-1"></script>
+  <link rel="stylesheet" href="style.css?v=external-1">
+  <script src="api-config.js?v=external-1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -44,6 +44,28 @@
           <button class="icon-btn" id="closeTheater" aria-label="关闭播放器"><i data-lucide="x"></i></button>
         </div>
         <p class="side-meta" id="activeMeta">支持 B 站嵌入播放与本地网页播放器</p>
+
+        <div class="active-details">
+          <img id="activeCover" alt="" hidden>
+          <div class="active-detail-text">
+            <p id="activeDescription" hidden></p>
+            <div class="url-row">
+              <input id="videoUrl" type="url" readonly aria-label="视频网址">
+              <button class="icon-btn" id="copyVideoUrl" aria-label="复制视频网址"><i data-lucide="copy"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="external-player">
+          <label for="externalPlayerUrl"><i data-lucide="link-2"></i>外链播放页</label>
+          <div class="direct-row">
+            <input id="externalPlayerUrl" type="url" placeholder="粘贴可通过网址播放的网页…" spellcheck="false">
+            <button class="icon-btn" id="saveExternalPlayer" aria-label="保存外链播放页"><i data-lucide="check"></i></button>
+          </div>
+          <a id="playExternal" class="ghost-btn hidden" target="_blank" rel="noopener">
+            <i data-lucide="external-link"></i>用外部网页播放
+          </a>
+        </div>
 
         <div id="embedHint" class="hint hidden">
           B 站视频由官方嵌入播放器提供，倍速与画质可在其播放器内调节。
@@ -122,7 +144,7 @@
     <p>B 站搜索经本地服务代理 · 本地样片支持倍速与逐帧控制</p>
   </footer>
 
-  <script src="hot-data.js"></script>
-  <script src="app.js"></script>
+  <script src="hot-data.js?v=external-1"></script>
+  <script src="app.js?v=external-1"></script>
 </body>
 </html>

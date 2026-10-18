@@ -1,7 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { handleSearch } = require('./lib/search-core');
+const { handleSearch, handleVideo } = require('./lib/search-core');
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -74,6 +74,12 @@ const server = http.createServer((req, res) => {
     handleSearch(url.searchParams)
       .then(data => sendJSON(res, 200, data))
       .catch(err => sendJSON(res, 502, { ok: false, error: err.message || '搜索失败' }));
+    return;
+  }
+  if (url.pathname === '/api/video') {
+    handleVideo(url.searchParams)
+      .then(video => sendJSON(res, 200, { ok: true, video }))
+      .catch(err => sendJSON(res, 502, { ok: false, error: err.message || '获取视频详情失败' }));
     return;
   }
   serveStatic(res, url.pathname);

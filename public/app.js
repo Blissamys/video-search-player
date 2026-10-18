@@ -22,6 +22,13 @@
   const stageEmpty = $('stageEmpty');
   const activeTitle = $('activeTitle');
   const activeMeta = $('activeMeta');
+  const activeCover = $('activeCover');
+  const activeDescription = $('activeDescription');
+  const videoUrlInput = $('videoUrl');
+  const copyVideoUrlBtn = $('copyVideoUrl');
+  const externalPlayerUrlInput = $('externalPlayerUrl');
+  const saveExternalPlayerBtn = $('saveExternalPlayer');
+  const playExternal = $('playExternal');
   const embedHint = $('embedHint');
   const videoControls = $('videoControls');
   const openOrigin = $('openOrigin');
@@ -54,6 +61,7 @@
 
   const SOURCE_NAMES = { bilibili: 'B站', sample: '样片' };
   const API_BASE = String(window.VIDEO_API_BASE || '').replace(/\/$/, '');
+  const EXTERNAL_PLAYER_KEY = 'videoSearchExternalPlayerUrl';
   let apiBase = API_BASE;
 
   let videoEl = null;
@@ -97,6 +105,56 @@
 
   function refreshIcons() {
     if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+  }
+
+  function buildExternalPlayerUrl(playerUrl, videoUrl) {
+    if (playerUrl.includes('{url}')) {
+      return playerUrl.replace('{url}', encodeURIComponent(videoUrl));
+    }
+    const url = new URL(playerUrl);
+    url.searchParams.set('url', videoUrl);
+    return url.toString();
+  }
+
+  function getSavedExternalPlayerUrl() {
+    const value = String(localStorage.getItem(EXTERNAL_PLAYER_KEY) || '').trim();
+    try {
+      return value ? new URL(value).toString() : '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function updateExternalPlayerLink(item) {
+    const playerUrl = getSavedExternalPlayerUrl();
+    if (!item || !item.url || !playerUrl) {
+      playExternal.classList.add('hidden');
+      return;
+    }
+    try {
+      playExternal.href = buildExternalPlayerUrl(playerUrl, item.url);
+      playExternal.classList.remove('hidden');
+    } catch (_) {
+      playExternal.classList.add('hidden');
+    }
+  }
+
+  async function loadVideoDetails(item) {
+    if (!item || item.source !== 'bilibili' || !item.id) return;
+    try {
+      const params = new URLSearchParams({ source: 'bilibili', id: item.id });
+      const res = await fetch(apiBase + '/api/video?' + params.toString(), { cache: 'no-store' });
+      const data = await res.json();
+      if (state.activeVideo !== item || !res.ok || !data.ok) return;
+      const details = data.video || {};
+      if (details.description) {
+        item.description = details.description;
+        activeDescription.textContent = details.description;
+        activeDescription.hidden = false;
+      }
+    } catch (_) {
+      // Search results remain usable when the optional detail lookup fails.
+    }
   }
 
   // ---------- feedback ----------
@@ -374,6 +432,26 @@
       item.duration,
     ].filter(Boolean).join(' · ');
 
+    if (item.cover) {
+      activeCover.src = item.cover;
+      activeCover.hidden = false;
+    } else {
+      activeCover.removeAttribute('src');
+      activeCover.hidden = true;
+    }
+
+    if (item.description) {
+      activeDescription.textContent = item.description;
+      activeDescription.hidden = false;
+    } else {
+      activeDescription.textContent = '';
+      activeDescription.hidden = true;
+    }
+
+    videoUrlInput.value = item.url || '';
+    updateExternalPlayerLink(item);
+    loadVideoDetails(item);
+
     if (item.url) {
       openOrigin.href = item.url;
       openOrigin.classList.remove('hidden');
@@ -408,11 +486,63 @@
     state.activeVideo = null;
     activeTitle.textContent = '未选择视频';
     activeMeta.textContent = '支持 B 站嵌入播放与本地网页播放器';
+    activeCover.removeAttribute('src');
+    activeCover.hidden = true;
+    activeDescription.textContent = '';
+    activeDescription.hidden = true;
+    videoUrlInput.value = '';
+    playExternal.classList.add('hidden');
     openOrigin.classList.add('hidden');
     embedHint.classList.add('hidden');
     videoControls.classList.add('hidden');
     stageEmpty.classList.remove('hidden');
     resultsEl.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  });
+
+  copyVideoUrlBtn.addEventListener('click', async () => {
+    const value = videoUrlInput.value;
+    if (!value) return;
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(value);
+      copied = true;
+    } catch (_) {
+      videoUrlInput.select();
+      copied = document.execCommand('copy');
+    }
+    if (copied) {
+      copyVideoUrlBtn.innerHTML = '<i data-lucide="check"></i>';
+      refreshIcons();
+      setTimeout(() => {
+        copyVideoUrlBtn.innerHTML = '<i data-lucide="copy"></i>';
+        refreshIcons();
+      }, 1200);
+    }
+  });
+
+  saveExternalPlayerBtn.addEventListener('click', () => {
+    const value = externalPlayerUrlInput.value.trim();
+    if (!value) {
+      localStorage.removeItem(EXTERNAL_PLAYER_KEY);
+      updateExternalPlayerLink(state.activeVideo);
+      saveExternalPlayerBtn.innerHTML = '<i data-lucide="check"></i>';
+      refreshIcons();
+      return;
+    }
+    try {
+      const normalized = new URL(value).toString();
+      localStorage.setItem(EXTERNAL_PLAYER_KEY, normalized);
+      externalPlayerUrlInput.value = normalized;
+      updateExternalPlayerLink(state.activeVideo);
+      saveExternalPlayerBtn.innerHTML = '<i data-lucide="check"></i>';
+    } catch (_) {
+      saveExternalPlayerBtn.innerHTML = '<i data-lucide="x"></i>';
+    }
+    refreshIcons();
+    setTimeout(() => {
+      saveExternalPlayerBtn.innerHTML = '<i data-lucide="check"></i>';
+      refreshIcons();
+    }, 1200);
   });
 
   // ---------- video controls ----------
@@ -628,6 +758,8 @@
     rateVal.textContent = parseFloat(savedRate).toFixed(2) + 'x';
     statRate.textContent = parseFloat(savedRate).toFixed(2) + 'x';
   }
+  const savedExternalPlayerUrl = getSavedExternalPlayerUrl();
+  if (savedExternalPlayerUrl) externalPlayerUrlInput.value = savedExternalPlayerUrl;
   // init
   refreshIcons();
   renderHistory();
