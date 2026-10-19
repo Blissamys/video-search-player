@@ -10,6 +10,7 @@
     activeVideo: null,
     hasMore: false,
     homeMode: true,
+    homeSnapshot: false,
   };
 
   // ---------- elements ----------
@@ -58,11 +59,15 @@
   const statRes = $('statRes');
   const directUrl = $('directUrl');
   const playDirect = $('playDirect');
+  const playParsed = $('playParsed');
 
   const SOURCE_NAMES = { bilibili: 'B站', sample: '样片' };
   const API_BASE = String(window.VIDEO_API_BASE || '').replace(/\/$/, '');
   const EXTERNAL_PLAYER_KEY = 'videoSearchExternalPlayerUrl';
   let apiBase = API_BASE;
+  const recommendationPolicy = window.RecommendationPolicy;
+  let searchController = null;
+  let searchVersion = 0;
 
   let videoEl = null;
   let frameCallbackId = null;
@@ -186,7 +191,7 @@
       feedback.querySelectorAll('.notice').forEach(n => n.remove());
       const div = document.createElement('div');
       div.className = 'loading-row';
-      div.innerHTML = '<div class="spinner"></div><span>正在搜索…</span>';
+      div.innerHTML = '<div class="spinner"></div><span>' + (state.homeMode ? '正在获取今日热门…' : '正在搜索…') + '</span>';
       feedback.appendChild(div);
     } else if (!show && existing) {
       existing.remove();
@@ -222,15 +227,28 @@
 
   function searchLocal(keyword) {
     const snapshot = Array.isArray(window.HOT_SNAPSHOT) ? window.HOT_SNAPSHOT : [];
-    if (!keyword) return snapshot.length ? snapshot.slice() : LOCAL_SAMPLES.slice();
+    if (!keyword) return recommendationPolicy.filterSearchResults(snapshot.length ? snapshot : LOCAL_SAMPLES);
     const words = keyword.toLowerCase().split(/\s+/).filter(Boolean);
-    return snapshot.concat(LOCAL_SAMPLES).filter(it => {
+    return recommendationPolicy.filterSearchResults(snapshot.concat(LOCAL_SAMPLES)).filter(it => {
       const hay = (it.title + ' ' + it.author).toLowerCase();
       return words.every(w => hay.includes(w));
     });
   }
 
-  function finishLocalSearch() {
+  function finishLocalSearch(notices = []) {
+    if (state.homeMode) {
+      state.homeSnapshot = true;
+      state.results = recommendationPolicy.chooseRecommendations(window.HOT_SNAPSHOT);
+      state.hasMore = false;
+      const updated = window.HOT_SNAPSHOT_UPDATED_AT;
+      const date = updated && Number.isFinite(Date.parse(updated))
+        ? recommendationPolicy.clockParts(new Date(updated)).date : '更新时间未知';
+      showNotices(notices.concat(state.results.length
+        ? ['当前热门服务不可用，显示离线热门快照（' + date + '），内容已按标题关键词筛选。']
+        : ['当前热门暂不可用，且没有可用的热门快照，请稍后重试。']));
+      renderResults();
+      return;
+    }
     state.results = searchLocal(state.keyword);
     state.hasMore = false;
     showNotices(state.keyword
@@ -240,10 +258,18 @@
   }
 
   async function runSearch(append = false, home = false) {
-    if (state.loading) return;
+    if (state.loading && !home) return;
+    if (searchController) searchController.abort();
+    searchController = new AbortController();
+    const controller = searchController;
+    const version = ++searchVersion;
     state.loading = true;
     state.homeMode = home;
-    if (home) state.keyword = loadHistory()[0] || '';
+    if (home) {
+      state.keyword = '';
+      searchInput.value = '';
+      state.homeSnapshot = false;
+    }
     if (!append) {
       state.page = 1;
       state.results = [];
@@ -252,6 +278,7 @@
     showLoading(true);
     loadMoreBtn.classList.add('hidden');
     await detectBackend();
+    if (version !== searchVersion) return;
     if (offlineMode) {
       finishLocalSearch();
       state.loading = false;
@@ -261,18 +288,27 @@
     try {
       const params = new URLSearchParams({
         keyword: state.keyword,
-        source: 'all',
+        source: state.homeMode ? 'bilibili' : 'all',
         page: String(state.page),
       });
-      const res = await fetch(apiBase + '/api/search?' + params.toString());
+      const res = await fetch(apiBase + '/api/search?' + params.toString(), { signal: controller.signal, cache: 'no-store' });
       const data = await res.json();
+      if (version !== searchVersion) return;
       if (!res.ok || !data.ok) throw new Error(data.error || '搜索失败，请稍后重试');
-      state.results = append ? state.results.concat(data.results) : data.results;
-      state.hasMore = !!data.hasMore;
+      if (state.homeMode && data.homeFeed?.available === false) {
+        finishLocalSearch(data.notices || []);
+        return;
+      }
+      state.results = recommendationPolicy.filterSearchResults(append ? state.results.concat(data.results) : data.results);
+      if (state.homeMode) state.results = recommendationPolicy.chooseRecommendations(state.results);
+      state.hasMore = !state.homeMode && !!data.hasMore && state.page < 5;
       showNotices(data.notices);
       renderResults();
     } catch (err) {
-      if (err instanceof TypeError) {
+      if (version !== searchVersion || err.name === 'AbortError') return;
+      if (state.homeMode) {
+        finishLocalSearch(['无法获取当前热门：' + (err.message || '网络错误')]);
+      } else if (err instanceof TypeError) {
         offlineMode = true;
         finishLocalSearch();
       } else {
@@ -283,19 +319,19 @@
       }
       }
     } finally {
-      state.loading = false;
-      showLoading(false);
-      loadMoreBtn.classList.toggle('hidden', !(state.hasMore && state.results.length));
+      if (version === searchVersion) {
+        state.loading = false;
+        showLoading(false);
+        loadMoreBtn.classList.toggle('hidden', !state.hasMore);
+      }
     }
   }
 
   function renderResults() {
     const n = state.results.length;
     if (state.homeMode) {
-      resultsTitle.textContent = state.keyword
-        ? '根据「' + state.keyword + '」推荐'
-        : '热门视频';
-      resultsCount.textContent = state.keyword ? n + ' 个推荐' : n + ' 个视频';
+      resultsTitle.textContent = state.homeSnapshot ? '热门快照' : '今日热门推荐';
+      resultsCount.textContent = n + ' 个热门随机推荐';
     } else {
       resultsTitle.textContent = '搜索结果';
       resultsCount.textContent = state.keyword
@@ -305,7 +341,9 @@
     if (!state.results.length) {
       resultsEl.innerHTML =
         '<div class="empty-state"><i data-lucide="search-x"></i><span>' +
-        (state.keyword ? '没有找到相关视频，换个关键词试试' : '输入关键词开始搜索') +
+        (state.homeMode ? '暂无符合标题筛选规则的热门推荐' : (state.keyword
+          ? (state.hasMore ? '本页暂无符合标题筛选规则的结果，可尝试加载更多' : '没有找到符合标题筛选规则的视频，换个关键词试试')
+          : '输入关键词开始搜索')) +
         '</span></div>';
       refreshIcons();
       return;
@@ -450,6 +488,8 @@
 
     videoUrlInput.value = item.url || '';
     updateExternalPlayerLink(item);
+    playParsed.classList.toggle('hidden', item.source !== 'bilibili' || !item.url);
+    if (item.source === 'bilibili' && item.url) playParsed.href = 'player/?url=' + encodeURIComponent(item.url);
     loadVideoDetails(item);
 
     if (item.url) {
@@ -492,6 +532,7 @@
     activeDescription.hidden = true;
     videoUrlInput.value = '';
     playExternal.classList.add('hidden');
+    playParsed.classList.add('hidden');
     openOrigin.classList.add('hidden');
     embedHint.classList.add('hidden');
     videoControls.classList.add('hidden');
@@ -643,8 +684,7 @@
     const url = directUrl.value.trim();
     if (!url) return;
     try {
-      const normalized = new URL(url, location.href).toString();
-      location.href = 'player/?url=' + encodeURIComponent(normalized);
+      location.href = 'player/?url=' + encodeURIComponent(url);
     } catch (_) {
       showError('视频网址格式不正确');
     }
@@ -753,5 +793,8 @@
   // init
   refreshIcons();
   renderHistory();
+  window.addEventListener('pageshow', event => {
+    if (event.persisted) runSearch(false, true);
+  });
   runSearch(false, true);
 })();

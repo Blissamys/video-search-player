@@ -5,7 +5,11 @@
   "description": "多来源视频搜索与网页播放器（B站 / 样片库）",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test test/bilibili-resolver.test.js test/server.test.js test/home-recommendations.test.js",
+    "test:browser": "node scripts/test-player.cjs",
+    "test:home": "node scripts/test-home.cjs",
+    "test:live": "node scripts/test-live.cjs"
   },
   "engines": {
     "node": ">=18"

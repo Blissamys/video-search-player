@@ -85,6 +85,92 @@ input, select { font: inherit; }
 
 .top-action:hover { color: var(--text); border-color: var(--accent); }
 
+.home-header {
+  display: grid;
+  grid-template-columns: auto 36px minmax(160px, 1fr) auto auto;
+  grid-template-areas: "brand home motto clock player";
+  gap: 16px;
+}
+.home-header .brand { grid-area: brand; min-width: 0; }
+.home-header > .top-action { grid-area: player; white-space: nowrap; }
+.home-button {
+  grid-area: home;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.home-button svg { width: 20px; height: 20px; }
+.home-button:hover { color: var(--accent); border-color: var(--accent); background: #fb72990c; }
+.home-button:focus-visible, .top-action:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.header-motto { grid-area: motto; text-align: center; font-size: 12px; line-height: 1.75; }
+.header-motto span { display: block; white-space: pre; }
+.header-motto span:first-child { color: var(--text-dim); }
+.header-motto span:last-child { color: var(--gold); letter-spacing: 1.5px; }
+.header-clock { grid-area: clock; display: flex; flex-direction: column; align-items: flex-end; white-space: nowrap; }
+.header-clock span { color: var(--text-dim); font-size: 11px; }
+.header-clock strong { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 19px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .4px; }
+.pixel-brand { overflow: hidden; width: 42px; height: 42px; flex: none; }
+.pixel-brand svg { width: 36px; height: 36px; }
+.pixel-person { animation: pixel-enter 4.2s steps(12, end) infinite; }
+.pixel-door { transform-origin: 25px 19px; animation: pixel-door 4.2s steps(5, end) infinite; }
+.pixel-leg { transform-origin: 9px 25px; animation: pixel-walk .42s steps(2, end) infinite alternate; }
+.pixel-leg.right { animation-direction: alternate-reverse; }
+.pixel-arm { animation: pixel-push 4.2s steps(2, end) infinite; }
+@keyframes pixel-enter {
+  0%, 10% { transform: translateX(0); opacity: 1; }
+  38%, 48% { transform: translateX(10px); opacity: 1; }
+  64% { transform: translateX(16px); opacity: 1; }
+  79%, 100% { transform: translateX(21px); opacity: 0; }
+}
+@keyframes pixel-door {
+  0%, 36%, 96%, 100% { transform: scaleX(1) skewY(0); }
+  51%, 80% { transform: scaleX(.18) skewY(-14deg); }
+}
+@keyframes pixel-walk { from { transform: translateX(-1px) rotate(-10deg); } to { transform: translateX(1px) rotate(10deg); } }
+@keyframes pixel-push { 0%, 33%, 75%, 100% { transform: translateX(0); } 38%, 60% { transform: translateX(2px); } }
+@media (prefers-reduced-motion: reduce) {
+  .pixel-person, .pixel-door, .pixel-leg, .pixel-arm { animation: none; }
+}
+
+@media (max-width: 800px) {
+  .topbar-inner.home-header {
+    grid-template-columns: minmax(0, 1fr) 36px auto auto;
+    grid-template-areas: "brand home clock player" "motto motto motto motto";
+    gap: 10px 14px;
+  }
+  .home-header .header-motto { display: block; text-align: center; }
+}
+@media (max-width: 640px) {
+  .topbar-inner.home-header {
+    grid-template-columns: minmax(0, 1fr) 34px auto;
+    grid-template-areas: "brand home player" "motto motto clock";
+    gap: 10px;
+    padding: 12px 16px;
+    align-items: center;
+  }
+  .home-header .brand { gap: 8px; }
+  .home-header .brand-text h1 { font-size: 15px; white-space: nowrap; }
+  .home-header .brand-text p { font-size: 10px; white-space: nowrap; }
+  .home-header .pixel-brand { width: 36px; height: 38px; }
+  .home-header .top-action { font-size: 12px; padding: 7px 10px; justify-content: center; }
+  .home-header .home-button { width: 34px; height: 34px; }
+  .home-header .header-motto { display: block; text-align: left; font-size: 11px; }
+  .home-header .header-clock span { font-size: 10px; }
+  .home-header .header-clock strong { font-size: 18px; }
+}
+@media (max-width: 380px) {
+  .home-header .brand-text h1 { font-size: 12px; }
+  .home-header .brand-text p { display: none; }
+  .home-header .brand { gap: 6px; }
+  .home-header .pixel-brand { width: 32px; }
+  .home-header .header-motto { font-size: 10px; }
+}
+
 /* ---------- Search ---------- */
 .searchbar-wrap {
   max-width: 1240px;

@@ -1,5 +1,6 @@
 // Refreshes public/hot-data.js so the standalone (file://) build can show
 // real Bilibili popular videos without a local server.
+import recommendationPolicy from '../public/recommendation-policy.js';
 
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 const headers = { 'User-Agent': UA, 'Referer': 'https://www.bilibili.com/' };
@@ -23,7 +24,7 @@ const warm = await fetch('https://www.bilibili.com/', { headers, redirect: 'foll
 const cookies = typeof warm.headers.getSetCookie === 'function' ? warm.headers.getSetCookie() : [];
 const buvid = cookies.map(c => c.split(';')[0]).find(c => c.startsWith('buvid3='));
 
-const res = await fetch('https://api.bilibili.com/x/web-interface/popular?ps=20&pn=1', {
+const res = await fetch('https://api.bilibili.com/x/web-interface/popular?ps=50&pn=1', {
   headers: { ...headers, ...(buvid ? { Cookie: buvid } : {}) },
 });
 const data = await res.json();
@@ -45,6 +46,8 @@ const items = data.data.list.map(v => ({
     + '&page=1&high_quality=1&danmaku=0&as_wide=1&autoplay=0',
 })).filter(it => it.id && it.title);
 
-const out = 'window.HOT_SNAPSHOT = ' + JSON.stringify(items, null, 2) + ';\n';
+const filtered = recommendationPolicy.eligibleVideos(items);
+const out = 'window.HOT_SNAPSHOT_UPDATED_AT = ' + JSON.stringify(new Date().toISOString()) + ';\n'
+  + 'window.HOT_SNAPSHOT = ' + JSON.stringify(filtered, null, 2) + ';\n';
 await (await import('node:fs/promises')).writeFile(new URL('../public/hot-data.js', import.meta.url), out, 'utf8');
-console.log('已写入 ' + items.length + ' 条热门视频到 public/hot-data.js');
+console.log('已写入 ' + filtered.length + ' 条经标题筛选的热门视频到 public/hot-data.js');

@@ -3,21 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聚合视频搜索播放器</title>
-  <link rel="stylesheet" href="style.css?v=player-1">
-  <script src="api-config.js?v=external-2"></script>
+  <title>入门款 · 视频搜索</title>
+  <link rel="stylesheet" href="style.css?v=home-2">
+  <script src="api-config.js?v=bili-1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
   <header class="topbar">
-    <div class="topbar-inner">
+    <div class="topbar-inner home-header">
       <div class="brand">
-        <span class="brand-mark"><i data-lucide="play"></i></span>
+        <span class="brand-mark pixel-brand" role="img" aria-label="火柴人推门进入的循环像素动画">
+          <svg viewBox="0 0 36 36" aria-hidden="true" shape-rendering="crispEdges">
+            <path fill="#3a2433" d="M24 6h9v25h-9z"/>
+            <path fill="#fff" d="M23 5h11v2H23zM23 5h2v27h-2zM32 5h2v27h-2zM3 31h31v1H3z"/>
+            <g class="pixel-person" fill="#fff">
+              <path d="M6 12h4v5H6zM7 17h2v8H7zM5 18h2v2H5zM3 20h2v2H3z"/>
+              <path class="pixel-arm" d="M9 18h3v2H9zM12 19h4v2h-4z"/>
+              <path class="pixel-leg left" d="M7 24h2v4H7zM5 28h4v2H5z"/>
+              <path class="pixel-leg right" d="M9 24h2v4H9zM10 28h4v2h-4z"/>
+            </g>
+            <g class="pixel-door"><path fill="#ffc7d7" d="M25 7h7v24h-7z"/><path fill="#8d3454" d="M29 18h2v2h-2z"/></g>
+          </svg>
+        </span>
         <div class="brand-text">
-          <h1>聚合视频搜索</h1>
+          <h1>入门款</h1>
           <p>多源检索 · 网页播放</p>
         </div>
       </div>
+      <a id="homeButton" class="home-button" href="./" aria-label="回到首页" title="回到首页">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7M5 9v11h5v-6h4v6h5V9"/></svg>
+      </a>
+      <div class="header-motto"><span>请自觉遵守中学生守则</span><span>保持热爱  星辰大海</span></div>
+      <time id="headerClock" class="header-clock" title="北京时间（Asia/Shanghai）"><span id="headerDate">--/--/--</span><strong id="headerTime">--:--:--</strong></time>
       <a class="top-action" href="player/">网址播放器</a>
     </div>
   </header>
@@ -72,6 +89,8 @@
           B 站视频由官方嵌入播放器提供，倍速与画质可在其播放器内调节。
         </div>
 
+        <a id="playParsed" class="ghost-btn hidden">解析播放 · 倍速 / 逐帧</a>
+
         <div id="videoControls" class="controls hidden">
           <div class="progress-row">
             <span id="currentTime">0:00</span>
@@ -117,9 +136,9 @@
         </div>
 
         <div class="direct-link">
-          <label for="directUrl"><i data-lucide="link"></i>直链播放</label>
+          <label for="directUrl"><i data-lucide="link"></i>链接播放</label>
           <div class="direct-row">
-            <input id="directUrl" type="url" placeholder="粘贴 mp4 / webm 视频直链…" spellcheck="false">
+            <input id="directUrl" type="text" placeholder="B 站链接、BV 号或 mp4 / webm 直链…" spellcheck="false">
             <button class="primary-btn" id="playDirect"><i data-lucide="play"></i>打开播放器</button>
           </div>
         </div>
@@ -142,10 +161,12 @@
   </main>
 
   <footer class="footer">
-    <p>B 站搜索经本地服务代理 · 本地样片支持倍速与逐帧控制</p>
+    <p>免责声明：本站非盈利性质 · 测试结束随时关门</p>
   </footer>
 
-  <script src="hot-data.js?v=external-2"></script>
-  <script src="app.js?v=player-1"></script>
+  <script src="recommendation-policy.js?v=search-3"></script>
+  <script src="header.js?v=home-2"></script>
+  <script src="hot-data.js?v=home-2"></script>
+  <script src="app.js?v=search-3"></script>
 </body>
 </html>

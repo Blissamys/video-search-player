@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>网址视频播放器</title>
-  <link rel="stylesheet" href="../style.css?v=player-1">
+  <link rel="stylesheet" href="../style.css?v=bili-1">
+  <script src="../api-config.js?v=bili-1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -14,7 +15,7 @@
         <span class="brand-mark"><i data-lucide="monitor-play"></i></span>
         <div class="brand-text">
           <h1>网址视频播放器</h1>
-          <p>直链播放 · 倍速逐帧</p>
+          <p>B 站链接 · 直链播放 · 倍速逐帧</p>
         </div>
       </div>
       <a class="top-action" href="../">返回搜索</a>
@@ -27,7 +28,7 @@
         <video id="video" playsinline></video>
         <div class="stage-empty" id="stageEmpty">
           <i data-lucide="link-2"></i>
-          <span>粘贴视频直链，或选择本机视频</span>
+          <span>粘贴 B 站链接、视频直链，或选择本机视频</span>
         </div>
       </section>
 
@@ -45,12 +46,19 @@
         </div>
 
         <form id="sourceForm" class="source-form" autocomplete="off">
-          <label for="sourceInput">视频直链</label>
+          <label for="sourceInput">B 站链接 / 视频直链</label>
           <div class="direct-row">
-            <input id="sourceInput" type="url" placeholder="https://example.com/video.mp4" spellcheck="false">
-            <button type="submit" class="primary-btn"><i data-lucide="play"></i>播放</button>
+            <input id="sourceInput" type="text" placeholder="B 站视频链接、BV 号或 mp4 直链" spellcheck="false" maxlength="4096">
+            <button id="sourceSubmit" type="submit" class="primary-btn"><i data-lucide="play"></i><span id="sourceSubmitLabel">解析 / 播放</span></button>
           </div>
         </form>
+
+        <div id="partPicker" class="source-form hidden">
+          <label for="partSelect">选择分 P</label>
+          <select id="partSelect" aria-label="选择分 P"></select>
+        </div>
+        <a id="originalLink" class="ghost-btn hidden" target="_blank" rel="noopener noreferrer">在 B 站打开</a>
+        <button id="retryResolve" type="button" class="ghost-btn hidden">重新解析</button>
 
         <label class="file-button">
           <i data-lucide="folder-open"></i>
@@ -107,6 +115,6 @@
     </div>
   </main>
 
-  <script src="../player.js?v=player-2"></script>
+  <script src="../player.js?v=bili-1"></script>
 </body>
 </html>
