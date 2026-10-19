@@ -140,6 +140,21 @@
     return url.toString();
   }
 
+  function isBilibiliPageURL(value) {
+    try {
+      const url = new URL(value, location.href);
+      const isBilibiliHost = /(^|\.)bilibili\.com$/.test(url.hostname);
+      const isShortLinkHost = /(^|\.)b23\.tv$/.test(url.hostname);
+      return (isBilibiliHost && /^\/video\//.test(url.pathname)) || isShortLinkHost;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function showBilibiliPageNotice() {
+    showNotice('这是 B 站视频网页链接，不是 mp4/webm 视频直链。请粘贴视频文件地址，或选择本机视频。', true);
+  }
+
   function fileNameFromURL(value) {
     try {
       const url = new URL(value);
@@ -196,6 +211,10 @@
   sourceForm.addEventListener('submit', (event) => {
     event.preventDefault();
     clearFeedback();
+    if (isBilibiliPageURL(sourceInput.value.trim())) {
+      showBilibiliPageNotice();
+      return;
+    }
     try {
       const url = normalizeInputURL(sourceInput.value.trim());
       const title = fileNameFromURL(url);
@@ -345,12 +364,17 @@
   const initialURL = params.get('url') || '';
   const initialTitle = params.get('title') || '';
   if (initialURL) {
-    try {
-      const normalized = normalizeInputURL(initialURL);
-      sourceInput.value = normalized;
-      loadSource(normalized, initialTitle || fileNameFromURL(normalized), new URL(normalized).hostname, false);
-    } catch (_) {
-      showNotice('链接中的视频网址无效。', true);
+    if (isBilibiliPageURL(initialURL)) {
+      sourceInput.value = initialURL;
+      showBilibiliPageNotice();
+    } else {
+      try {
+        const normalized = normalizeInputURL(initialURL);
+        sourceInput.value = normalized;
+        loadSource(normalized, initialTitle || fileNameFromURL(normalized), new URL(normalized).hostname, false);
+      } catch (_) {
+        showNotice('链接中的视频网址无效。', true);
+      }
     }
   }
 
