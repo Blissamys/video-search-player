@@ -642,22 +642,12 @@
   playDirect.addEventListener('click', () => {
     const url = directUrl.value.trim();
     if (!url) return;
-    let host = url;
     try {
-      host = new URL(url, location.href).hostname;
-    } catch (_) { /* keep raw */ }
-    openVideo({
-      id: 'direct',
-      source: 'sample',
-      title: '直链视频',
-      author: host,
-      duration: '',
-      cover: '',
-      plays: 0,
-      date: '',
-      url: url,
-      playUrl: url,
-    });
+      const normalized = new URL(url, location.href).toString();
+      location.href = 'player/?url=' + encodeURIComponent(normalized);
+    } catch (_) {
+      showError('视频网址格式不正确');
+    }
   });
 
   directUrl.addEventListener('keydown', (e) => {

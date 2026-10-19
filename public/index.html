@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>聚合视频搜索播放器</title>
-  <link rel="stylesheet" href="style.css?v=external-2">
+  <link rel="stylesheet" href="style.css?v=player-1">
   <script src="api-config.js?v=external-2"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -18,6 +18,7 @@
           <p>多源检索 · 网页播放</p>
         </div>
       </div>
+      <a class="top-action" href="player/">网址播放器</a>
     </div>
   </header>
 
@@ -119,7 +120,7 @@
           <label for="directUrl"><i data-lucide="link"></i>直链播放</label>
           <div class="direct-row">
             <input id="directUrl" type="url" placeholder="粘贴 mp4 / webm 视频直链…" spellcheck="false">
-            <button class="primary-btn" id="playDirect"><i data-lucide="play"></i>播放</button>
+            <button class="primary-btn" id="playDirect"><i data-lucide="play"></i>打开播放器</button>
           </div>
         </div>
 
@@ -145,6 +146,6 @@
   </footer>
 
   <script src="hot-data.js?v=external-2"></script>
-  <script src="app.js?v=external-2"></script>
+  <script src="app.js?v=player-1"></script>
 </body>
 </html>

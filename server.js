@@ -16,7 +16,10 @@ const MIME = {
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
   '.ico': 'image/x-icon',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
 };
 
 function sendJSON(res, status, data) {
@@ -35,23 +38,28 @@ function sendJSON(res, status, data) {
 // ---------------------------------------------------------------------------
 
 function serveStatic(res, pathname) {
-  const filePath = path.normalize(path.join(PUBLIC_DIR, pathname === '/' ? 'index.html' : pathname));
+  let filePath = path.normalize(path.join(PUBLIC_DIR, pathname === '/' ? 'index.html' : pathname));
   if (!filePath.startsWith(PUBLIC_DIR)) {
     res.writeHead(403);
     res.end('Forbidden');
     return;
   }
-  fs.readFile(filePath, (err, buf) => {
-    if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-      res.end('404 Not Found');
-      return;
+  fs.stat(filePath, (statErr, stats) => {
+    if (!statErr && stats.isDirectory()) {
+      filePath = path.join(filePath, 'index.html');
     }
-    res.writeHead(200, {
-      'Content-Type': MIME[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
-      'Cache-Control': 'no-cache',
+    fs.readFile(filePath, (err, buf) => {
+      if (err) {
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('404 Not Found');
+        return;
+      }
+      res.writeHead(200, {
+        'Content-Type': MIME[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
+        'Cache-Control': 'no-cache',
+      });
+      res.end(buf);
     });
-    res.end(buf);
   });
 }
 

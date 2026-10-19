@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>网址视频播放器</title>
+  <link rel="stylesheet" href="../style.css?v=player-1">
+  <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark"><i data-lucide="monitor-play"></i></span>
+        <div class="brand-text">
+          <h1>网址视频播放器</h1>
+          <p>直链播放 · 倍速逐帧</p>
+        </div>
+      </div>
+      <a class="top-action" href="../">返回搜索</a>
+    </div>
+  </header>
+
+  <main class="player-page">
+    <div class="player-shell">
+      <section class="player-stage" aria-label="视频画面">
+        <video id="video" playsinline></video>
+        <div class="stage-empty" id="stageEmpty">
+          <i data-lucide="link-2"></i>
+          <span>粘贴视频直链，或选择本机视频</span>
+        </div>
+      </section>
+
+      <aside class="player-side">
+        <div class="side-head">
+          <div>
+            <h2 id="videoTitle">未选择视频</h2>
+            <p class="side-meta">
+              <span id="videoHost">--</span>
+              <span aria-hidden="true"> · </span>
+              <span id="videoDuration">--:--</span>
+            </p>
+          </div>
+          <button class="icon-btn" id="shareButton" aria-label="复制播放页链接"><i data-lucide="share-2"></i></button>
+        </div>
+
+        <form id="sourceForm" class="source-form" autocomplete="off">
+          <label for="sourceInput">视频直链</label>
+          <div class="direct-row">
+            <input id="sourceInput" type="url" placeholder="https://example.com/video.mp4" spellcheck="false">
+            <button type="submit" class="primary-btn"><i data-lucide="play"></i>播放</button>
+          </div>
+        </form>
+
+        <label class="file-button">
+          <i data-lucide="folder-open"></i>
+          选择本机视频
+          <input id="localFile" type="file" accept="video/*" hidden>
+        </label>
+
+        <div id="feedback" class="player-feedback" aria-live="polite"></div>
+
+        <div class="controls player-controls">
+          <div class="progress-row">
+            <span id="currentTime">0:00</span>
+            <input type="range" id="progress" min="0" max="1000" value="0" step="1" aria-label="进度">
+            <span id="totalTime">0:00</span>
+          </div>
+
+          <div class="transport-row">
+            <button class="icon-btn" id="back5" aria-label="后退5秒"><i data-lucide="rotate-ccw"></i></button>
+            <button class="icon-btn big" id="playBtn" aria-label="播放或暂停"><i data-lucide="play"></i></button>
+            <button class="icon-btn" id="fwd5" aria-label="前进5秒"><i data-lucide="rotate-cw"></i></button>
+            <span class="divider"></span>
+            <button class="icon-btn" id="prevFrame" aria-label="上一帧"><i data-lucide="chevron-first"></i></button>
+            <span class="frame-label">帧</span>
+            <button class="icon-btn" id="nextFrame" aria-label="下一帧"><i data-lucide="chevron-last"></i></button>
+            <select id="fpsSelect" aria-label="帧率">
+              <option value="auto">自动</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+              <option value="60">60</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <label class="setting-label" for="rate">倍速 <output id="rateVal">1.00x</output></label>
+            <input type="range" id="rate" min="0.25" max="4" step="0.05" value="1" aria-label="播放倍速">
+          </div>
+
+          <div class="toggle-row">
+            <button class="toggle" id="loopBtn" aria-pressed="false"><i data-lucide="repeat"></i>循环</button>
+            <button class="toggle" id="muteBtn" aria-pressed="false"><i data-lucide="volume-2"></i>静音</button>
+            <input type="range" id="volume" min="0" max="1" step="0.01" value="1" aria-label="音量">
+            <button class="icon-btn" id="fullBtn" aria-label="全屏"><i data-lucide="maximize"></i></button>
+          </div>
+
+          <dl class="stats">
+            <div><dt>实测帧率</dt><dd id="statFps">--</dd></div>
+            <div><dt>分辨率</dt><dd id="statRes">--</dd></div>
+            <div><dt>当前倍速</dt><dd id="statRate">1.00x</dd></div>
+          </dl>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="../player.js?v=player-1"></script>
+</body>
+</html>
